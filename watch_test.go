@@ -39,6 +39,10 @@ func TestWatcherNoChanges(t *testing.T) {
 	err := watcher.AddFile(file, event)
 	assertNoError(err, t)
 	go assertNoSignal(event, t)
+	// it should receive a signal in 5 seconds, so we are waiting 6 seconds
+	// for the goroutine assertNoSignal to receive that signal, if it does not
+	// receive any signal is because the file does not have any change so
+	// close the channel and pass the test
 	<-time.After(6 * time.Second)
 	close(event)
 }
