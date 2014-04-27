@@ -19,8 +19,8 @@ func assertTrue(assertion bool, t *testing.T, msg string) {
 }
 
 func assertSignal(ch_signal chan string, t *testing.T, signal_msg string) {
-	path, done := <-ch_signal
-	if !done && path != signal_msg {
+	path := <-ch_signal
+	if path != signal_msg {
 		t.Error("Error: it should send a signal with the changed file path")
 	}
 }
@@ -49,11 +49,11 @@ func TestWatcherChanges(t *testing.T) {
 	event := make(chan string)
 	err := watcher.AddFile(file, event)
 	assertNoError(err, t)
-	go assertSignal(event, t, file)
 
 	<-time.After(5 * time.Second)
 	os_filed, err := os.OpenFile(file, os.O_WRONLY|os.O_APPEND, 0777)
 	assertNoError(err, t)
 	os_filed.WriteString("Hello World Golang Watcher\n")
 	os_filed.Close()
+	assertSignal(event, t, file)
 }
